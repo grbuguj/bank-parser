@@ -124,7 +124,8 @@ if run_button and api_key and uploaded_file:
         # 1단계: PDF → 이미지 변환
         with st.spinner("📄 PDF를 이미지로 변환 중..."):
             pdf_bytes = uploaded_file.read()
-            images = pdf_to_images(pdf_bytes)
+            split = 3 if bank_name == "케이뱅크" else 1
+            images = pdf_to_images(pdf_bytes, split=split)
             st.success(f"총 {len(images)}페이지 감지")
 
         # 2단계: GPT 처리 (진행바 표시)

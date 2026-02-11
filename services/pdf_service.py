@@ -4,8 +4,10 @@ import io
 from typing import List
 
 
-def pdf_to_images(pdf_bytes: bytes, dpi: int = 300) -> List[Image.Image]:
-    """PDF 바이트를 PIL 이미지 리스트로 변환 (DPI 300으로 최적화)"""
+def pdf_to_images(pdf_bytes: bytes, dpi: int = 300, split: int = 1) -> List[Image.Image]:
+    """PDF 바이트를 PIL 이미지 리스트로 변환
+    split: 페이지를 세로로 몇 등분할지 (1=분할없음, 2=2등분, 3=3등분)
+    """
     images = []
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
 
@@ -16,10 +18,29 @@ def pdf_to_images(pdf_bytes: bytes, dpi: int = 300) -> List[Image.Image]:
         img_bytes = pix.tobytes("png")
         image = Image.open(io.BytesIO(img_bytes))
         image = preprocess_image(image)
-        images.append(image)
+
+        if split > 1:
+            images.extend(_split_image(image, split))
+        else:
+            images.append(image)
 
     doc.close()
     return images
+
+
+def _split_image(image: Image.Image, n: int) -> List[Image.Image]:
+    """이미지를 세로로 n등분. 10% 오버랩으로 경계 행 누락 방지"""
+    w, h = image.size
+    chunk = h // n
+    overlap = int(chunk * 0.1)  # 10% 오버랩
+    parts = []
+
+    for i in range(n):
+        top = max(0, i * chunk - overlap)
+        bottom = min(h, (i + 1) * chunk + overlap)
+        parts.append(image.crop((0, top, w, bottom)))
+
+    return parts
 
 
 def preprocess_image(image: Image.Image) -> Image.Image:
