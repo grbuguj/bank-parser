@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -8,7 +7,7 @@ class Transaction:
     date: str           # YYYY-MM-DD HH:MM:SS
     type: str           # "입금" or "출금"
     amount: int
-    reason: str         # 거래사유 (AI추측 포함)
+    reason: str         # 거래사유
 
     @property
     def deposit_date(self) -> str:
