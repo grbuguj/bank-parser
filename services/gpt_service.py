@@ -76,6 +76,7 @@ def call_gpt_single_page(
             )
             raw = response.choices[0].message.content
             transactions = extract_json_from_response(raw)
+            print(f"[페이지 {page_num}] 추출 {len(transactions)}건")
             return page_num, transactions
 
         except Exception as e:
@@ -141,7 +142,16 @@ def process_pdf_with_gpt(
 
     transactions.sort(key=parse_date)
 
-    return transactions
+    # 중복 제거 (date + type + amount 동일한 거래)
+    seen = set()
+    deduped = []
+    for t in transactions:
+        key = (t.date, t.type, t.amount)
+        if key not in seen:
+            seen.add(key)
+            deduped.append(t)
+
+    return deduped
 
 
 def filter_transactions(

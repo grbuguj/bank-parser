@@ -129,7 +129,7 @@ if run_button and api_key and uploaded_file:
             st.success(f"총 {len(images)}페이지 감지")
 
         # 2단계: GPT 처리 (진행바 표시)
-        st.markdown("**GPT가 거래내역을 분석 중입니다...**")
+        st.markdown("**재웅이가 거래내역을 분석 중입니다...**")
         progress_bar = st.progress(0)
         status_text = st.empty()
 

@@ -17,12 +17,13 @@ def pdf_to_images(pdf_bytes: bytes, dpi: int = 300, split: int = 1) -> List[Imag
         pix = page.get_pixmap(matrix=mat)
         img_bytes = pix.tobytes("png")
         image = Image.open(io.BytesIO(img_bytes))
-        image = preprocess_image(image)
 
         if split > 1:
-            images.extend(_split_image(image, split))
+            # 원본 고해상도 상태에서 먼저 분할 → 각 조각에 전처리 적용
+            for part in _split_image(image, split):
+                images.append(preprocess_image(part))
         else:
-            images.append(image)
+            images.append(preprocess_image(image))
 
     doc.close()
     return images
@@ -32,7 +33,7 @@ def _split_image(image: Image.Image, n: int) -> List[Image.Image]:
     """이미지를 세로로 n등분. 10% 오버랩으로 경계 행 누락 방지"""
     w, h = image.size
     chunk = h // n
-    overlap = int(chunk * 0.1)  # 10% 오버랩
+    overlap = int(chunk * 0.1)
     parts = []
 
     for i in range(n):
